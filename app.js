@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Protect from CORS error
 app.use(cors({ credentials: true, origin: 'http://localhost:4200' }));
@@ -38,13 +38,15 @@ app.use('/comments', commentRouter);
 
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const port = 3000;
 
-app.listen(port, () => {
-  const date = new Date();
-  console.log('Server running:', date.toLocaleDateString(), date.toLocaleTimeString());
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    const date = new Date();
+    console.log('⚡ Server running:', date.toLocaleDateString(), date.toLocaleTimeString(), '⚡');
+  });
+}
 
 module.exports = app;

@@ -67,57 +67,68 @@ exports.create = (req, res, next) => {
 
     User.create(data)
       .then(data => { res.status(201).json(data) })
-      .catch(err => console.log(err));
+      .catch(err => {
+        err.name == "SequelizeUniqueConstraintError" ?
+          res.status(403).json({ 'error': `Duplicate entry. Impossible to add` }) :
+          res.status(400).json({ 'error': `Can't add, bad fields. Check the documentation` });
+      });
   });
 };
 
 exports.updateById = (req, res, next) => {
   const token = TokenService.getDecodedToken(req);
   const id = req.params.id;
-
-  if (token.role !== 'admin') {
-    if (token.id !== id) return res.status(403).json({ 'error': 'No permision' });
-  }
-
   const data = req.body;
-  User.update(data, { where: { id: id } })
-    .then(() => { res.status(200).json({ message: 'User updated' }) })
-    .catch(err => console.log(err));
+  console.log('update by id: ' + id, 'token.id: ' + token.id);
+  if (token.id != id && token.role != 'admin') {
+    console.log(`if ${token.id} != ${id} && '${token.role}' != 'admin' return error 403 'No permision'`);
+    return res.status(403).json({ 'error': 'No permision' });
+  } else {
+    User.update(data, { where: { id: id } })
+      .then(() => { res.status(200).json({ message: 'User updated' }) })
+      .catch(err => {
+        err.name == "SequelizeUniqueConstraintError" ?
+          res.status(403).json({ 'error': `Duplicate entry. Impossible to add` }) :
+          res.status(400).json({ 'error': `Can't add, bad fields. Check the documentation` });
+      });
+  }
 };
 
 exports.destroyById = (req, res, next) => {
   const token = TokenService.getDecodedToken(req);
   const id = req.params.id;
 
-  if (token.role !== 'admin') {
-    if (token.id !== id) return res.status(403).json({ 'error': 'No permision' });
+  if (token.id != id && token.role != 'admin') {
+    console.log(`if ${token.id} != ${id} && '${token.role}' != 'admin' return error 403 'No permision'`);
+    return res.status(403).json({ 'error': 'No permision' });
+  } else {
+    User.destroy({ where: { id: id } })
+      .then(user => res.status(200).json({ message: 'User deleted' }))
+      .catch(err => console.log(err));
   }
-
-  User.destroy({ where: { id: id } })
-    .then(user => res.status(200).json({ message: 'User deleted' }))
-    .catch(err => console.log(err));
 };
 
 exports.loginByUsername = (req, res, next) => {
+  console.log('login by username: ' + req.body.username);
   User.findOne({
     where: { username: req.body.username },
     include: { model: Role, attributes: ['name'] }
   })
     .then(user => {
       if (user) {
-        console.log('login_user', user);
         bcrypt.compare(req.body.password, user.password, (err, result) => {
           if (err) { return res.status(500).json(err); }
           else {
             if (result) {
               const token = TokenService.generateToken(user);
+              console.log('log user', token);
               res.status(200).json({ token: token });
-            } else { return res.json({ message: 'You fail' }); }
+            } else { return res.status(404).json({ error: 'Credential error' }); }
           }
         })
       } else {
         // username does not matches to any users
-        res.status(404).json({ message: 'Bad login / password' })
+        res.status(404).json({ error: 'Credential error' })
       }
     })
     .catch(error => { res.status(500).json(error); });

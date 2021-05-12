@@ -8,7 +8,7 @@ module.exports = {
         lastname: null,
         username: "default.admin",
         RoleId: 1,
-        email: "default.admin@intsaapi.lan",
+        email: "default.admin@instaapi.lan",
         password: "$2b$10$8vB0p3mdAXw4o4h002Rld.5bcca5UsU.fqmXzNk.usJ0uNAfzRYCW", // admin
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "cross": "^1.0.0",
+    "cross-env": "^7.0.3",
     "jest": "^26.6.3",
     "sequelize-cli": "^6.2.0",
     "supertest": "^6.0.1"

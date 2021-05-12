@@ -16,7 +16,6 @@ module.exports = {
           model: 'Users',
           key: 'id'
         },
-        unique: 'UserPicture'
       },
       PictureId: {
         type: Sequelize.INTEGER,

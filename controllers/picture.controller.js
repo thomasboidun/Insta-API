@@ -13,6 +13,7 @@ exports.findAll = (req, res, next) => {
       {
         model: User,
         attributes: ['id', 'username'],
+        through: { attributes: [] }
       },
       {
         model: Comment,
@@ -38,7 +39,8 @@ exports.findById = (req, res, next) => {
     include: [
       {
         model: User,
-        attributes: ['id', 'username']
+        attributes: ['id', 'username'],
+        through: { attributes: [] }
       }
     ]
   })
@@ -76,19 +78,24 @@ exports.create = (req, res, next) => {
 exports.updateById = (req, res, next) => {
   const token = TokenService.getDecodedToken(req);
   const pictureId = req.params.id;
-  const data = req.body;
 
-  // check if picture belongs to user
-  UserPicture.findOne({ where: { PictureId: pictureId } })
-    .then(check => {
-      if (token.id === check.UserId) {
-        Picture.update(data, { where: { id: pictureId } })
-          .then(() => { res.status(200).json({ 'message': 'Picture updated' }) })
-          .catch(err => console.log(err));
-      } else {
-        res.status(403).json({ 'error': 'No permision' })
-      };
-    });
+  if (!req.body.desc) {
+    return res.status(400).json({ 'error': `Can't update, bad fields. Check the documentation` });
+  } else {
+    const data = { desc: req.body.desc };
+
+    // check if picture belongs to user
+    UserPicture.findOne({ where: { PictureId: pictureId } })
+      .then(check => {
+        if (token.id === check.UserId) {
+          Picture.update(data, { where: { id: pictureId } })
+            .then(() => { res.status(200).json({ 'message': 'Picture updated' }) })
+            .catch(err => console.log(err));
+        } else {
+          res.status(403).json({ 'error': 'No permision' })
+        };
+      });
+  }
 };
 
 exports.destroyById = (req, res, next) => {

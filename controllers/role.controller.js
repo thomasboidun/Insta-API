@@ -22,11 +22,11 @@ exports.create = (req, res, next) => {
   const token = TokenService.getDecodedToken(req);
   if (token.role !== 'admin') return res.status(403).json({ 'error': 'No permision' });
 
-  const data = req.body;
+  const roleData = req.body;
 
-  if (!data.name || data.name.trim().length < 1) return res.status(400).json({ 'error': `Can't add, bad fields. Check the documentation` });
+  if (!roleData.name || roleData.name.trim().length < 1) return res.status(400).json({ 'error': `Can't add, bad fields. Check the documentation` });
 
-  Role.create(data)
+  Role.create(roleData)
     .then(data => { res.status(201).json(data) })
     .catch(err => {
       err.name == "SequelizeUniqueConstraintError" ?
@@ -44,7 +44,11 @@ exports.updateById = (req, res, next) => {
 
   Role.update(data, { where: { id: id } })
     .then(() => { res.status(200).json({ 'message': 'Role updated' }) })
-    .catch(err => console.log(err))
+    .catch(err => {
+      err.name == "SequelizeUniqueConstraintError" ?
+        res.status(403).json({ 'error': `Duplicate entry. Impossible to add` }) :
+        res.status(400).json({ 'error': `Can't add, bad fields. Check the documentation` });
+    });
 };
 
 exports.destroyById = (req, res, next) => {

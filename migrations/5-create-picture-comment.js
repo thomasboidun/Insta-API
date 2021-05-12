@@ -16,7 +16,6 @@ module.exports = {
           model: 'Pictures',
           key: 'id'
         },
-        unique: 'PictureComment'
       },
       CommentId: {
         type: Sequelize.INTEGER,
@@ -26,7 +25,6 @@ module.exports = {
           model: 'Comments',
           key: 'id'
         },
-        unique: 'PictureComment'
       },
       createdAt: {
         allowNull: false,
